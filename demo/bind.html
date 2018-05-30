@@ -12,23 +12,50 @@
   <input type="text" id="input" placeholder="请输入内容"></input>
   <span id="span">请输入内容</span>
   <script>
-    /*
-        单项绑定
-        几种实现双向绑定的方法:
-        1. 
-        
-        */
     var obj = {}
+    /*
+      双向绑定步骤:
+    1.确定绑定属性的UI元素
+    2.监听属性和UI元素的变化
+    3.将变化传播到绑定的对象和元素
+    
+    几种实现双向绑定的方法:
+    1.发布-订阅模式
+      用自定义的data属性在HTML中明确指定,所有绑定起来的js对象及DOM元素都将'订阅'一个发布者对象
+      任何时候如果js对象或者html输入字段被侦测到了变化,我们将代理事件到发布者-订阅者模式,这会反过来
+      将变化广播并传播到所有绑定的第一项和元素
+    2.脏检查 
+      比对数据是否变更来决定是否更新视图
+      *DOM事件，譬如用户输入文本，点击按钮等。( ng-click )
+      *XHR响应事件 ( $http )
+      *浏览器Location变更事件 ( $location )
+      *Timer事件( $timeout , $interval )
+      *执行 $digest() 或 $apply()
+    3.vue采用数据劫持结合发布者-订阅者模式通过Object.defineProperty()来劫持各个属性的setter和
+      getter,在数据变化时发布消息给订阅者,出发相应的监听回调 
+
+      要实现mvvm双向绑定,则要实现以下几点
+      3.1要实现一个数据监听器Observer,能够对数据对象的所有属性进行监听,
+          如果有变动可以拿到最新值并通知订阅者
+      3.2实现一个指令解析器Compile,对每个元素节点的指令进行扫描和解析,
+          根据指令模板替换数据,以及绑定相应的更新函数           
+      3.3实现一个Watcher,作为连接Observer和Compile的桥梁,能够订阅并收到每个属性变动的通知,
+          执行指令绑定的响应回调函数,从而更新视图
+      3.4mvvm入口函数,整合以上三者
+      流程图
+      https://sfault-image.b0.upaiyun.com/132/184/132184689-57b310ea1804f
+      */
+
     Object.defineProperty(obj, 'hello', {
-      get: function () {
+      get: function() {
         return 'a'
       },
-      set: function (val) {
+      set: function(val) {
         document.getElementById('span').innerText = val || "请输入内容"
         document.getElementById('input').value = val
       }
     })
-    document.getElementById("input").oninput = function (e) {
+    document.getElementById("input").oninput = function(e) {
       obj.hello = e.target.value
     }
   </script>
